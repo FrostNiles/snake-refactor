@@ -34,26 +34,7 @@ namespace Snake
                 {
                     gameSettings.gameover = true;
                 }
-                for (int i = 0; i < gameSettings.screenWidth; i++)
-                {
-                    Console.SetCursorPosition(i, 0);
-                    drawCube();
-                }
-                for (int i = 0; i < gameSettings.screenWidth; i++)
-                {
-                    Console.SetCursorPosition(i, gameSettings.screenHeight - 1);
-                    drawCube();
-                }
-                for (int i = 0; i < gameSettings.screenHeight; i++)
-                {
-                    Console.SetCursorPosition(0, i);
-                    drawCube();
-                }
-                for (int i = 0; i < gameSettings.screenHeight; i++)
-                {
-                    Console.SetCursorPosition(gameSettings.screenWidth - 1, i);
-                    drawCube();
-                }
+                drawGame(gameSettings.screenWidth, gameSettings.screenHeight);
                 Console.ForegroundColor = ConsoleColor.Green;
                 if (xPosBerry == snake.head.XPos && YPosBerry == snake.head.YPos)
                 {
@@ -116,7 +97,7 @@ namespace Snake
                     }
                 }
                 snake.body.Add(new Pixel(snake.head.XPos, snake.head.YPos, ConsoleColor.Red));
-                snake.changePosition();
+                snake.changePosition(movement);
                 
                 if (snake.body.Count() > gameSettings.score)
                 {
@@ -126,6 +107,24 @@ namespace Snake
             Console.SetCursorPosition(gameSettings.screenWidth / 5, gameSettings.screenHeight / 2);
             Console.WriteLine("Game over, Score: " + gameSettings.score);
             Console.SetCursorPosition(gameSettings.screenWidth / 5, gameSettings.screenHeight / 2 + 1);
+        }
+
+        static void drawGame(int screenWidth, int screenHeight)
+        {
+            for (int i = 0; i < screenWidth; i++)
+            {
+                Console.SetCursorPosition(i, 0);
+                drawCube();
+                Console.SetCursorPosition(i, screenHeight - 1);
+                drawCube();
+            }
+            for (int i = 0; i < screenHeight; i++)
+            {
+                Console.SetCursorPosition(0, i);
+                drawCube();
+                Console.SetCursorPosition(screenWidth - 1, i);
+                drawCube();
+            }
         }
 
         static void drawCube()
@@ -175,7 +174,7 @@ namespace Snake
                 // TODO
             }
 
-            public void changePosition()
+            public void changePosition(Direction direction)
             {
                 switch (direction)
                 {
