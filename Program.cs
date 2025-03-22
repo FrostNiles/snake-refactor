@@ -16,7 +16,8 @@ namespace Snake
 
             Random randNum = new Random();
 
-            Snake snake = new Snake(Direction.Right, gameSettings.screenWidth / 2, gameSettings.screenHeight / 2, ConsoleColor.Red);          
+            Pixel head = new Pixel(gameSettings.screenWidth / 2, gameSettings.screenHeight / 2, ConsoleColor.Red);
+            Snake snake = new Snake(Direction.Right, head);          
 
             int xPosBerry = randNum.Next(0, gameSettings.screenWidth);
             int YPosBerry = randNum.Next(0, gameSettings.screenHeight);
@@ -30,18 +31,21 @@ namespace Snake
             while (true)
             {
                 Console.Clear();
+                // when snake hits the wall
                 if (snake.head.XPos == gameSettings.screenWidth - 1 || snake.head.XPos == 0 || snake.head.YPos == gameSettings.screenHeight - 1 || snake.head.YPos == 0)
                 {
                     gameSettings.gameover = true;
                 }
                 drawGame(gameSettings.screenWidth, gameSettings.screenHeight);
-                Console.ForegroundColor = ConsoleColor.Green;
+                
+                // when snake eats the berry
                 if (xPosBerry == snake.head.XPos && YPosBerry == snake.head.YPos)
                 {
                     gameSettings.score++;
                     xPosBerry = randNum.Next(1, gameSettings.screenWidth - 2);
                     YPosBerry = randNum.Next(1, gameSettings.screenHeight - 2);
                 }
+                // when snake hits itself
                 for (int i = 0; i < snake.body.Count(); i++)
                 {
                     Console.SetCursorPosition(snake.body[i].XPos, snake.body[i].YPos);
@@ -55,18 +59,21 @@ namespace Snake
                 {
                     break;
                 }
+                // draw snake
                 Console.SetCursorPosition(snake.head.XPos, snake.head.YPos);
                 Console.ForegroundColor = snake.head.ScreenColor;
                 drawCube();
+                // draw berry
                 Console.SetCursorPosition(xPosBerry, YPosBerry);
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 drawCube();
                 time = DateTime.Now;
                 buttonPressed = false;
+                // movement
                 while (true)
                 {
                     time2 = DateTime.Now;
-                    if (time2.Subtract(time).TotalMilliseconds > 500) 
+                    if (time2.Subtract(time).TotalMilliseconds > 200) 
                     { 
                         break; 
                     }
@@ -125,6 +132,7 @@ namespace Snake
                 Console.SetCursorPosition(screenWidth - 1, i);
                 drawCube();
             }
+            Console.ForegroundColor = ConsoleColor.Green;
         }
 
         static void drawCube()
@@ -151,10 +159,10 @@ namespace Snake
         // TODO OVERRIDE BASIC INHERITED METHODS FOR ALL CLASSES
         class Snake
         {
-            public Snake(Direction direction, int headX, int headY, ConsoleColor color)
+            public Snake(Direction direction, Pixel head)
             {
                 this.direction = direction;
-                this.head = new Pixel(headX, headY, color);
+                this.head = head;
                 this.body = new List<Pixel>();
             }
 
