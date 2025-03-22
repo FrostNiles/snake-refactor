@@ -177,13 +177,29 @@ namespace Snake
 
         }
 
+        class GameSettings
+        {
+            public GameSettings(int screenWidth, int screenHeight, int score, bool gameover)
+            {
+                this.screenWidth = screenWidth;
+                this.screenHeight = screenHeight;
+                this.score = score;
+                this.gameover = gameover;
+            }
+
+            public int screenWidth { get; set; }
+            public int screenHeight { get; set; }
+            public int score { get; set; }
+            public bool gameover { get; set; }
+        }
+
         class Pixel
         {
             public Pixel(int xPos, int yPos, ConsoleColor color)
             {
-                XPos = xPos;
-                YPos = yPos;
-                ScreenColor = color;
+                this.XPos = xPos;
+                this.YPos = yPos;
+                this.ScreenColor = color;
             }
             public int XPos { get; set; }
             public int YPos { get; set; }
