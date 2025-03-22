@@ -24,8 +24,6 @@ namespace Snake
             DateTime time = DateTime.Now;
             DateTime time2 = DateTime.Now;
 
-            bool buttonPressed = false;
-
             while (true)
             {
                 Console.Clear();
@@ -65,7 +63,6 @@ namespace Snake
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 drawCube();
                 time = DateTime.Now;
-                buttonPressed = false;
                 // movement
                 while (true)
                 {
@@ -140,24 +137,55 @@ namespace Snake
 
             public void Move()
             {
+                //TODO NOT CHECKING BUTTON PRESSED ANYMORE ...
                 if (Console.KeyAvailable)
                 {
                     ConsoleKeyInfo toets = Console.ReadKey(true);
-                    if (toets.Key.Equals(ConsoleKey.UpArrow) && this.direction != Direction.Down)
+                    if (toets.Key.Equals(ConsoleKey.UpArrow))
                     {
-                        this.direction = Direction.Up;
+                        if (this.direction != Direction.Down)
+                        {
+                            this.direction = Direction.Up;
+                        }
+                        else
+                        {
+                            // TODO GAMEOVER
+                        }
                     }
-                    if (toets.Key.Equals(ConsoleKey.DownArrow) && this.direction != Direction.Up)
+                    if (toets.Key.Equals(ConsoleKey.DownArrow))
                     {
-                        this.direction = Direction.Down;
+                        if (this.direction != Direction.Up)
+                        {
+                            this.direction = Direction.Down;
+                        }
+                        else
+                        {
+                            // TODO GAMEOVER
+                        }
+                        
                     }
-                    if (toets.Key.Equals(ConsoleKey.LeftArrow) && this.direction != Direction.Right)
+                    if (toets.Key.Equals(ConsoleKey.LeftArrow))
                     {
-                        this.direction = Direction.Left;
+                        if (this.direction != Direction.Right)
+                        {
+                            this.direction = Direction.Left;
+                        }
+                        else
+                        {
+                            // TODO GAMEOVER
+                        }
+                        
                     }
-                    if (toets.Key.Equals(ConsoleKey.RightArrow) && this.direction != Direction.Left)
+                    if (toets.Key.Equals(ConsoleKey.RightArrow))
                     {
-                        this.direction = Direction.Right;
+                        if (this.direction != Direction.Left)
+                        {
+                            this.direction = Direction.Right;
+                        }
+                        else
+                        {
+                            // TODO GAMEOVER
+                        }
                     }
                 }
             }
