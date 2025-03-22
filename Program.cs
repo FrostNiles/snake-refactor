@@ -45,22 +45,22 @@ namespace Snake
                 for (int i = 0; i < screenWidth; i++)
                 {
                     Console.SetCursorPosition(i, 0);
-                    Console.Write("■");
+                    drawCube();
                 }
                 for (int i = 0; i < screenWidth; i++)
                 {
                     Console.SetCursorPosition(i, screenHeight - 1);
-                    Console.Write("■");
+                    drawCube();
                 }
                 for (int i = 0; i < screenHeight; i++)
                 {
                     Console.SetCursorPosition(0, i);
-                    Console.Write("■");
+                    drawCube();
                 }
                 for (int i = 0; i < screenHeight; i++)
                 {
                     Console.SetCursorPosition(screenWidth - 1, i);
-                    Console.Write("■");
+                    drawCube();
                 }
                 Console.ForegroundColor = ConsoleColor.Green;
                 if (xPosBerry == head.XPos && YPosBerry == head.YPos)
@@ -72,7 +72,7 @@ namespace Snake
                 for (int i = 0; i < xPosBody.Count(); i++)
                 {
                     Console.SetCursorPosition(xPosBody[i], YPosBody[i]);
-                    Console.Write("■");
+                    drawCube();
                     if (xPosBody[i] == head.XPos && YPosBody[i] == head.YPos)
                     {
                         gameover = true;
@@ -84,16 +84,19 @@ namespace Snake
                 }
                 Console.SetCursorPosition(head.XPos, head.YPos);
                 Console.ForegroundColor = head.ScreenColor;
-                Console.Write("■");
+                drawCube();
                 Console.SetCursorPosition(xPosBerry, YPosBerry);
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write("■");
+                drawCube();
                 time = DateTime.Now;
                 buttonPressed = false;
                 while (true)
                 {
                     time2 = DateTime.Now;
-                    if (time2.Subtract(time).TotalMilliseconds > 500) { break; }
+                    if (time2.Subtract(time).TotalMilliseconds > 500) 
+                    { 
+                        break; 
+                    }
                     if (Console.KeyAvailable)
                     {
                         ConsoleKeyInfo toets = Console.ReadKey(true);
@@ -146,6 +149,32 @@ namespace Snake
             Console.SetCursorPosition(screenWidth / 5, screenHeight / 2);
             Console.WriteLine("Game over, Score: " + score);
             Console.SetCursorPosition(screenWidth / 5, screenHeight / 2 + 1);
+        }
+
+        static void drawCube()
+        {
+            Console.Write("■");
+        }
+
+        class Berry
+        {
+            Random randNumber = new Random();
+            var randX = randNumber.Next(1, 63); // TODO rewrite this from numbers to 
+            var randY = randNumber.Next(1, 31);
+            Pixel berryPosition = new Pixel(randX, randY, ConsoleColor.Cyan);
+            // TODO UPDATE POSITION
+            // TODO DRAW BERRY
+            // TODO EAT BERRY
+        }
+
+        class Snake
+        {
+            Pixel head = new Pixel(16, 10, ConsoleColor.Red); // TODO random position - in the middle of the screen
+            
+            List<Pixel> body = new List<Pixel>();
+            
+            Direction direction = Direction.Right;
+
         }
 
         class Pixel
