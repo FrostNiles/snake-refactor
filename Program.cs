@@ -32,8 +32,8 @@ namespace Snake
             DateTime time = DateTime.Now;
             DateTime time2 = DateTime.Now;
 
-            string movement = "RIGHT";
-            string buttonPressed = "no";
+            Direction movement = Direction.Right;
+            bool buttonPressed = false;
 
             while (true)
             {
@@ -89,7 +89,7 @@ namespace Snake
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.Write("■");
                 time = DateTime.Now;
-                buttonPressed = "no";
+                buttonPressed = false;
                 while (true)
                 {
                     time2 = DateTime.Now;
@@ -98,25 +98,25 @@ namespace Snake
                     {
                         ConsoleKeyInfo toets = Console.ReadKey(true);
                         //Console.WriteLine(toets.Key.ToString());
-                        if (toets.Key.Equals(ConsoleKey.UpArrow) && movement != "DOWN" && buttonPressed == "no")
+                        if (toets.Key.Equals(ConsoleKey.UpArrow) && movement != Direction.Down && buttonPressed == false)
                         {
-                            movement = "UP";
-                            buttonPressed = "yes";
+                            movement = Direction.Up;
+                            buttonPressed = true;
                         }
-                        if (toets.Key.Equals(ConsoleKey.DownArrow) && movement != "UP" && buttonPressed == "no")
+                        if (toets.Key.Equals(ConsoleKey.DownArrow) && movement != Direction.Up && buttonPressed == false)
                         {
-                            movement = "DOWN";
-                            buttonPressed = "yes";
+                            movement = Direction.Down;
+                            buttonPressed = true;
                         }
-                        if (toets.Key.Equals(ConsoleKey.LeftArrow) && movement != "RIGHT" && buttonPressed == "no")
+                        if (toets.Key.Equals(ConsoleKey.LeftArrow) && movement != Direction.Right && buttonPressed == false)
                         {
-                            movement = "LEFT";
-                            buttonPressed = "yes";
+                            movement = Direction.Left;
+                            buttonPressed = true;
                         }
-                        if (toets.Key.Equals(ConsoleKey.RightArrow) && movement != "LEFT" && buttonPressed == "no")
+                        if (toets.Key.Equals(ConsoleKey.RightArrow) && movement != Direction.Left && buttonPressed == false)
                         {
-                            movement = "RIGHT";
-                            buttonPressed = "yes";
+                            movement = Direction.Right;
+                            buttonPressed = true;
                         }
                     }
                 }
@@ -124,16 +124,16 @@ namespace Snake
                 YPosBody.Add(head.YPos);
                 switch (movement)
                 {
-                    case "UP":
+                    case Direction.Up:
                         head.YPos--;
                         break;
-                    case "DOWN":
+                    case Direction.Down:
                         head.YPos++;
                         break;
-                    case "LEFT":
+                    case Direction.Left:
                         head.XPos--;
                         break;
-                    case "RIGHT":
+                    case Direction.Right:
                         head.XPos++;
                         break;
                 }
@@ -160,8 +160,6 @@ namespace Snake
             public int YPos { get; set; }
             public ConsoleColor ScreenColor { get; set; }
         }
-
-
         
         enum Direction
         {
