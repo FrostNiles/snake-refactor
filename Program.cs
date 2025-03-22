@@ -24,6 +24,7 @@ namespace Snake
             DateTime time = DateTime.Now;
             DateTime time2 = DateTime.Now;
 
+            // game loop
             while (true)
             {
                 Console.Clear();
@@ -54,10 +55,8 @@ namespace Snake
                 {
                     break;
                 }
-                // draw snake
-                Console.SetCursorPosition(snake.head.XPos, snake.head.YPos);
-                Console.ForegroundColor = snake.head.ScreenColor;
-                drawCube();
+                
+                drawSnake(snake.head);
                 // draw berry
                 Console.SetCursorPosition(xPosBerry, YPosBerry);
                 Console.ForegroundColor = ConsoleColor.Cyan;
@@ -67,11 +66,14 @@ namespace Snake
                 while (true)
                 {
                     time2 = DateTime.Now;
-                    if (time2.Subtract(time).TotalMilliseconds > 200) 
+                    if (time2.Subtract(time).TotalMilliseconds > 500) 
                     { 
                         break; 
                     }
-                    snake.Move();
+                    gameSettings.gameover = snake.Move();
+                    //break;
+                    // with this break the snake moves only once and the condition for gameover works
+
                 }
                 snake.body.Add(new Pixel(snake.head.XPos, snake.head.YPos, ConsoleColor.Red));
                 snake.changePosition();
@@ -86,6 +88,12 @@ namespace Snake
             Console.SetCursorPosition(gameSettings.screenWidth / 5, gameSettings.screenHeight / 2 + 1);
         }
 
+        static void drawSnake(Pixel head)
+        {
+            Console.SetCursorPosition(head.XPos, head.YPos);
+            Console.ForegroundColor = head.ScreenColor;
+            drawCube();
+        }
         
 
         static void drawCube()
@@ -135,21 +143,23 @@ namespace Snake
                 // TODO
             }
 
-            public void Move()
+            public bool Move()
             {
                 //TODO NOT CHECKING BUTTON PRESSED ANYMORE ...
-                if (Console.KeyAvailable)
+                while (Console.KeyAvailable)
                 {
-                    ConsoleKeyInfo toets = Console.ReadKey(true);
+                    ConsoleKeyInfo toets = Console.ReadKey(false);
                     if (toets.Key.Equals(ConsoleKey.UpArrow))
                     {
+                        Console.WriteLine(toets.Key);
                         if (this.direction != Direction.Down)
                         {
                             this.direction = Direction.Up;
+                            return false;
                         }
                         else
                         {
-                            // TODO GAMEOVER
+                            return true;
                         }
                     }
                     if (toets.Key.Equals(ConsoleKey.DownArrow))
@@ -157,10 +167,11 @@ namespace Snake
                         if (this.direction != Direction.Up)
                         {
                             this.direction = Direction.Down;
+                            return false;
                         }
                         else
                         {
-                            // TODO GAMEOVER
+                            return true;
                         }
                         
                     }
@@ -169,10 +180,11 @@ namespace Snake
                         if (this.direction != Direction.Right)
                         {
                             this.direction = Direction.Left;
+                            return false;
                         }
                         else
                         {
-                            // TODO GAMEOVER
+                            return true;
                         }
                         
                     }
@@ -181,13 +193,16 @@ namespace Snake
                         if (this.direction != Direction.Left)
                         {
                             this.direction = Direction.Right;
+                            return false;
                         }
                         else
                         {
-                            // TODO GAMEOVER
+                            return true;
                         }
                     }
+                    return false;
                 }
+                return false;
             }
 
             public void changePosition()
