@@ -5,6 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 
+//TODO REWRITE INTO CLASSES
+// TODO CHANGE GAME redraw
+// TODO OVERRIDE BASIC INHERITED METHODS FOR ALL CLASSES
+
 namespace Snake
 {
     class Program
@@ -17,9 +21,7 @@ namespace Snake
 
             Pixel head = new Pixel(gameSettings.screenWidth / 2, gameSettings.screenHeight / 2, ConsoleColor.Red);
             Snake snake = new Snake(Direction.Right, head);          
-
-            int xPosBerry = randNum.Next(1, gameSettings.screenWidth);
-            int YPosBerry = randNum.Next(1, gameSettings.screenHeight);
+            Berry berry = new Berry(gameSettings.screenWidth, gameSettings.screenHeight);
 
             DateTime time = DateTime.Now;
             DateTime time2 = DateTime.Now;
@@ -33,13 +35,13 @@ namespace Snake
                 {
                     gameSettings.gameover = true;
                 }
-                gameSettings.Draw();
+                gameSettings.DrawGameArea();
                 // when snake eats the berry
-                if (xPosBerry == snake.head.XPos && YPosBerry == snake.head.YPos)
+                if (berry.berryPosition.XPos == snake.head.XPos && berry.berryPosition.YPos == snake.head.YPos)
                 {
                     gameSettings.score++;
-                    xPosBerry = randNum.Next(1, gameSettings.screenWidth - 2);
-                    YPosBerry = randNum.Next(1, gameSettings.screenHeight - 2);
+                    berry.UpdatePosition();
+                    
                 }
                 // when snake hits itself
                 for (int i = 0; i < snake.body.Count(); i++)
@@ -56,11 +58,9 @@ namespace Snake
                     break;
                 }
                 
-                drawSnake(snake.head);
-                // draw berry
-                Console.SetCursorPosition(xPosBerry, YPosBerry);
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                drawCube();
+                snake.Draw();
+                berry.Draw();
+
                 time = DateTime.Now;
                 // movement
                 while (true)
@@ -88,36 +88,52 @@ namespace Snake
             Console.SetCursorPosition(gameSettings.screenWidth / 5, gameSettings.screenHeight / 2 + 1);
         }
 
-        static void drawSnake(Pixel head)
-        {
-            Console.SetCursorPosition(head.XPos, head.YPos);
-            Console.ForegroundColor = head.ScreenColor;
-            drawCube();
-        }
-        
-
         static void drawCube()
         {
             Console.Write("■");
+        }
+
+        static int getRandomNumber(int min, int max)
+        {
+            Random randNumber = new Random();
+            int randX = randNumber.Next(min, max);
+            return randX;
         }
 
         class Berry
         {
             // TODO do I want to have one berry or multiple berries?
             // TODO up to that I need random position for the berry or every berry
+            public Berry(int screenWidth, int screenHeight)
+            {
+                this.screenWidth = screenWidth;
+                this.screenHeight = screenHeight;
+                this.berryPosition = new Pixel(getRandomNumber(1, screenWidth), getRandomNumber(1, screenHeight), ConsoleColor.Cyan);
+            }
 
-            
-//            Random randNumber = new Random();
-  //          var randX = randNumber.Next(1, 63); // TODO rewrite this from numbers to gameSettings
-    //        var randY = randNumber.Next(1, 31);
-      //      Pixel berryPosition = new Pixel(randX, randY, ConsoleColor.Cyan);
-            // TODO UPDATE POSITION
-            // TODO DRAW BERRY
+            public Pixel berryPosition { get; set; }
+            int screenHeight { get; set; }
+            int screenWidth { get; set; }
+
+
+            public void Draw()
+            {
+                Console.SetCursorPosition(berryPosition.XPos, berryPosition.YPos);
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                drawCube();
+            }
+
+            public void UpdatePosition()
+            {
+                berryPosition.XPos = getRandomNumber(1, screenWidth);
+                berryPosition.YPos = getRandomNumber(1, screenHeight);
+            }
+
             // TODO EAT BERRY
         }
 
 
-        // TODO OVERRIDE BASIC INHERITED METHODS FOR ALL CLASSES
+        
         class Snake
         {
             public Snake(Direction direction, Pixel head)
@@ -134,7 +150,9 @@ namespace Snake
 
             public void Draw()
             {
-                // TODO
+                Console.SetCursorPosition(head.XPos, head.YPos);
+                Console.ForegroundColor = head.ScreenColor;
+                drawCube();
             }
 
 
@@ -251,7 +269,7 @@ namespace Snake
             public int score { get; set; }
             public bool gameover { get; set; }
 
-            public void Draw()
+            public void DrawGameArea()
             {
                 for (int i = 0; i < this.screenWidth; i++)
                 {
