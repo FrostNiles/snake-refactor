@@ -16,12 +16,7 @@ namespace Snake
 
             Random randNum = new Random();
 
-            Snake snake = new Snake(Direction.Right, gameSettings.screenWidth / 2, gameSettings.screenHeight / 2, ConsoleColor.Red);
-            
-            
-
-            List<int> xPosBody = new List<int>();
-            List<int> YPosBody = new List<int>();
+            Snake snake = new Snake(Direction.Right, gameSettings.screenWidth / 2, gameSettings.screenHeight / 2, ConsoleColor.Red);          
 
             int xPosBerry = randNum.Next(0, gameSettings.screenWidth);
             int YPosBerry = randNum.Next(0, gameSettings.screenHeight);
@@ -66,11 +61,11 @@ namespace Snake
                     xPosBerry = randNum.Next(1, gameSettings.screenWidth - 2);
                     YPosBerry = randNum.Next(1, gameSettings.screenHeight - 2);
                 }
-                for (int i = 0; i < xPosBody.Count(); i++)
+                for (int i = 0; i < snake.body.Count(); i++)
                 {
-                    Console.SetCursorPosition(xPosBody[i], YPosBody[i]);
+                    Console.SetCursorPosition(snake.body[i].XPos, snake.body[i].YPos);
                     drawCube();
-                    if (xPosBody[i] == snake.head.XPos && YPosBody[i] == snake.head.YPos)
+                    if (snake.body[i].XPos == snake.head.XPos && snake.body[i].YPos == snake.head.YPos)
                     {
                         gameSettings.gameover = true;
                     }
@@ -120,27 +115,12 @@ namespace Snake
                         }
                     }
                 }
-                xPosBody.Add(snake.head.XPos);
-                YPosBody.Add(snake.head.YPos);
-                switch (movement)
+                snake.body.Add(new Pixel(snake.head.XPos, snake.head.YPos, ConsoleColor.Red));
+                snake.changePosition();
+                
+                if (snake.body.Count() > gameSettings.score)
                 {
-                    case Direction.Up:
-                        snake.head.YPos--;
-                        break;
-                    case Direction.Down:
-                        snake.head.YPos++;
-                        break;
-                    case Direction.Left:
-                        snake.head.XPos--;
-                        break;
-                    case Direction.Right:
-                        snake.head.XPos++;
-                        break;
-                }
-                if (xPosBody.Count() > gameSettings.score)
-                {
-                    xPosBody.RemoveAt(0);
-                    YPosBody.RemoveAt(0);
+                    snake.body.RemoveAt(0);
                 }
             }
             Console.SetCursorPosition(gameSettings.screenWidth / 5, gameSettings.screenHeight / 2);
@@ -168,6 +148,8 @@ namespace Snake
             // TODO EAT BERRY
         }
 
+
+        // TODO OVERRIDE BASIC INHERITED METHODS FOR ALL CLASSES
         class Snake
         {
             public Snake(Direction direction, int headX, int headY, ConsoleColor color)
@@ -193,7 +175,7 @@ namespace Snake
                 // TODO
             }
 
-            public void Move()
+            public void changePosition()
             {
                 switch (direction)
                 {
