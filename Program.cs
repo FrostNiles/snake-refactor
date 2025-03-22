@@ -11,23 +11,18 @@ namespace Snake
     {
         static void Main(string[] args)
         {
-            Console.WindowHeight = 32;
-            Console.WindowWidth = 64;
+            GameSettings gameSettings = new GameSettings(64, 32, 5, false);
 
-            int screenWidth = Console.WindowWidth;
-            int screenHeight = Console.WindowHeight;
             Random randNum = new Random();
 
-            int score = 5;
-            bool gameover = false;
 
-            Pixel head = new Pixel(screenWidth/2, screenHeight/2, ConsoleColor.Red);
+            Pixel head = new Pixel(gameSettings.screenWidth/2, gameSettings.screenHeight/2, ConsoleColor.Red);
 
             List<int> xPosBody = new List<int>();
             List<int> YPosBody = new List<int>();
 
-            int xPosBerry = randNum.Next(0, screenWidth);
-            int YPosBerry = randNum.Next(0, screenHeight);
+            int xPosBerry = randNum.Next(0, gameSettings.screenWidth);
+            int YPosBerry = randNum.Next(0, gameSettings.screenHeight);
 
             DateTime time = DateTime.Now;
             DateTime time2 = DateTime.Now;
@@ -38,36 +33,36 @@ namespace Snake
             while (true)
             {
                 Console.Clear();
-                if (head.XPos == screenWidth - 1 || head.XPos == 0 || head.YPos == screenHeight - 1 || head.YPos == 0)
+                if (head.XPos == gameSettings.screenWidth - 1 || head.XPos == 0 || head.YPos == gameSettings.screenHeight - 1 || head.YPos == 0)
                 {
-                    gameover = true;
+                    gameSettings.gameover = true;
                 }
-                for (int i = 0; i < screenWidth; i++)
+                for (int i = 0; i < gameSettings.screenWidth; i++)
                 {
                     Console.SetCursorPosition(i, 0);
                     drawCube();
                 }
-                for (int i = 0; i < screenWidth; i++)
+                for (int i = 0; i < gameSettings.screenWidth; i++)
                 {
-                    Console.SetCursorPosition(i, screenHeight - 1);
+                    Console.SetCursorPosition(i, gameSettings.screenHeight - 1);
                     drawCube();
                 }
-                for (int i = 0; i < screenHeight; i++)
+                for (int i = 0; i < gameSettings.screenHeight; i++)
                 {
                     Console.SetCursorPosition(0, i);
                     drawCube();
                 }
-                for (int i = 0; i < screenHeight; i++)
+                for (int i = 0; i < gameSettings.screenHeight; i++)
                 {
-                    Console.SetCursorPosition(screenWidth - 1, i);
+                    Console.SetCursorPosition(gameSettings.screenWidth - 1, i);
                     drawCube();
                 }
                 Console.ForegroundColor = ConsoleColor.Green;
                 if (xPosBerry == head.XPos && YPosBerry == head.YPos)
                 {
-                    score++;
-                    xPosBerry = randNum.Next(1, screenWidth - 2);
-                    YPosBerry = randNum.Next(1, screenHeight - 2);
+                    gameSettings.score++;
+                    xPosBerry = randNum.Next(1, gameSettings.screenWidth - 2);
+                    YPosBerry = randNum.Next(1, gameSettings.screenHeight - 2);
                 }
                 for (int i = 0; i < xPosBody.Count(); i++)
                 {
@@ -75,10 +70,10 @@ namespace Snake
                     drawCube();
                     if (xPosBody[i] == head.XPos && YPosBody[i] == head.YPos)
                     {
-                        gameover = true;
+                        gameSettings.gameover = true;
                     }
                 }
-                if (gameover)
+                if (gameSettings.gameover == true)
                 {
                     break;
                 }
@@ -140,15 +135,15 @@ namespace Snake
                         head.XPos++;
                         break;
                 }
-                if (xPosBody.Count() > score)
+                if (xPosBody.Count() > gameSettings.score)
                 {
                     xPosBody.RemoveAt(0);
                     YPosBody.RemoveAt(0);
                 }
             }
-            Console.SetCursorPosition(screenWidth / 5, screenHeight / 2);
-            Console.WriteLine("Game over, Score: " + score);
-            Console.SetCursorPosition(screenWidth / 5, screenHeight / 2 + 1);
+            Console.SetCursorPosition(gameSettings.screenWidth / 5, gameSettings.screenHeight / 2);
+            Console.WriteLine("Game over, Score: " + gameSettings.score);
+            Console.SetCursorPosition(gameSettings.screenWidth / 5, gameSettings.screenHeight / 2 + 1);
         }
 
         static void drawCube()
@@ -158,8 +153,19 @@ namespace Snake
 
         class Berry
         {
+            // TODO do I want to have one berry or multiple berries?
+            // TODO up to that I need random position for the berry or every berry
+            public Berry(int xPos, int yPos, ConsoleColor color)
+            {
+                this.XPos = xPos;
+                this.YPos = yPos;
+                this.ScreenColor = color;
+            }
+
+            public Pixel berryPosition { get; set; }
+            
             Random randNumber = new Random();
-            var randX = randNumber.Next(1, 63); // TODO rewrite this from numbers to 
+            var randX = randNumber.Next(1, 63); // TODO rewrite this from numbers to gameSettings
             var randY = randNumber.Next(1, 31);
             Pixel berryPosition = new Pixel(randX, randY, ConsoleColor.Cyan);
             // TODO UPDATE POSITION
@@ -169,16 +175,30 @@ namespace Snake
 
         class Snake
         {
+            public Snake(Direction direction)
+            {
+                this.direction = direction;
+            }
+
+            public Direction direction { get; set; }
+
             Pixel head = new Pixel(16, 10, ConsoleColor.Red); // TODO random position - in the middle of the screen
             
             List<Pixel> body = new List<Pixel>();
             
-            Direction direction = Direction.Right;
 
         }
 
         class GameSettings
         {
+            public GameSettings()
+            {
+                this.screenWidth = 64;
+                this.screenHeight = 32;
+                this.score = 0;
+                this.gameover = false;
+            }
+
             public GameSettings(int screenWidth, int screenHeight, int score, bool gameover)
             {
                 this.screenWidth = screenWidth;
@@ -201,6 +221,7 @@ namespace Snake
                 this.YPos = yPos;
                 this.ScreenColor = color;
             }
+
             public int XPos { get; set; }
             public int YPos { get; set; }
             public ConsoleColor ScreenColor { get; set; }
