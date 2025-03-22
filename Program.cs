@@ -13,10 +13,12 @@ namespace Snake
         {
             GameSettings gameSettings = new GameSettings(64, 32, 5, false);
 
+
             Random randNum = new Random();
 
-
-            Pixel head = new Pixel(gameSettings.screenWidth/2, gameSettings.screenHeight/2, ConsoleColor.Red);
+            Snake snake = new Snake(Direction.Right, gameSettings.screenWidth / 2, gameSettings.screenHeight / 2, ConsoleColor.Red);
+            
+            
 
             List<int> xPosBody = new List<int>();
             List<int> YPosBody = new List<int>();
@@ -33,7 +35,7 @@ namespace Snake
             while (true)
             {
                 Console.Clear();
-                if (head.XPos == gameSettings.screenWidth - 1 || head.XPos == 0 || head.YPos == gameSettings.screenHeight - 1 || head.YPos == 0)
+                if (snake.head.XPos == gameSettings.screenWidth - 1 || snake.head.XPos == 0 || snake.head.YPos == gameSettings.screenHeight - 1 || snake.head.YPos == 0)
                 {
                     gameSettings.gameover = true;
                 }
@@ -58,7 +60,7 @@ namespace Snake
                     drawCube();
                 }
                 Console.ForegroundColor = ConsoleColor.Green;
-                if (xPosBerry == head.XPos && YPosBerry == head.YPos)
+                if (xPosBerry == snake.head.XPos && YPosBerry == snake.head.YPos)
                 {
                     gameSettings.score++;
                     xPosBerry = randNum.Next(1, gameSettings.screenWidth - 2);
@@ -68,7 +70,7 @@ namespace Snake
                 {
                     Console.SetCursorPosition(xPosBody[i], YPosBody[i]);
                     drawCube();
-                    if (xPosBody[i] == head.XPos && YPosBody[i] == head.YPos)
+                    if (xPosBody[i] == snake.head.XPos && YPosBody[i] == snake.head.YPos)
                     {
                         gameSettings.gameover = true;
                     }
@@ -77,8 +79,8 @@ namespace Snake
                 {
                     break;
                 }
-                Console.SetCursorPosition(head.XPos, head.YPos);
-                Console.ForegroundColor = head.ScreenColor;
+                Console.SetCursorPosition(snake.head.XPos, snake.head.YPos);
+                Console.ForegroundColor = snake.head.ScreenColor;
                 drawCube();
                 Console.SetCursorPosition(xPosBerry, YPosBerry);
                 Console.ForegroundColor = ConsoleColor.Cyan;
@@ -118,21 +120,21 @@ namespace Snake
                         }
                     }
                 }
-                xPosBody.Add(head.XPos);
-                YPosBody.Add(head.YPos);
+                xPosBody.Add(snake.head.XPos);
+                YPosBody.Add(snake.head.YPos);
                 switch (movement)
                 {
                     case Direction.Up:
-                        head.YPos--;
+                        snake.head.YPos--;
                         break;
                     case Direction.Down:
-                        head.YPos++;
+                        snake.head.YPos++;
                         break;
                     case Direction.Left:
-                        head.XPos--;
+                        snake.head.XPos--;
                         break;
                     case Direction.Right:
-                        head.XPos++;
+                        snake.head.XPos++;
                         break;
                 }
                 if (xPosBody.Count() > gameSettings.score)
@@ -155,19 +157,12 @@ namespace Snake
         {
             // TODO do I want to have one berry or multiple berries?
             // TODO up to that I need random position for the berry or every berry
-            public Berry(int xPos, int yPos, ConsoleColor color)
-            {
-                this.XPos = xPos;
-                this.YPos = yPos;
-                this.ScreenColor = color;
-            }
 
-            public Pixel berryPosition { get; set; }
             
-            Random randNumber = new Random();
-            var randX = randNumber.Next(1, 63); // TODO rewrite this from numbers to gameSettings
-            var randY = randNumber.Next(1, 31);
-            Pixel berryPosition = new Pixel(randX, randY, ConsoleColor.Cyan);
+//            Random randNumber = new Random();
+  //          var randX = randNumber.Next(1, 63); // TODO rewrite this from numbers to gameSettings
+    //        var randY = randNumber.Next(1, 31);
+      //      Pixel berryPosition = new Pixel(randX, randY, ConsoleColor.Cyan);
             // TODO UPDATE POSITION
             // TODO DRAW BERRY
             // TODO EAT BERRY
@@ -175,16 +170,48 @@ namespace Snake
 
         class Snake
         {
-            public Snake(Direction direction)
+            public Snake(Direction direction, int headX, int headY, ConsoleColor color)
             {
                 this.direction = direction;
+                this.head = new Pixel(headX, headY, color);
+                this.body = new List<Pixel>();
             }
 
             public Direction direction { get; set; }
+            public Pixel head { get; set; }
+            public List<Pixel> body { get; set; }
 
-            Pixel head = new Pixel(16, 10, ConsoleColor.Red); // TODO random position - in the middle of the screen
-            
-            List<Pixel> body = new List<Pixel>();
+
+            public void Draw()
+            {
+                // TODO
+            }
+
+
+            public void Eat()
+            {
+                // TODO
+            }
+
+            public void Move()
+            {
+                switch (direction)
+                {
+                    case Direction.Up:
+                        head.YPos--;
+                        break;
+                    case Direction.Down:
+                        head.YPos++;
+                        break;
+                    case Direction.Left:
+                        head.XPos--;
+                        break;
+                    case Direction.Right:
+                        head.XPos++;
+                        break;
+                }
+            }
+
             
 
         }
