@@ -105,5 +105,26 @@ namespace Snake
             return Head.X <= 0 || Head.X >= width - 1 ||
                    Head.Y <= 0 || Head.Y >= height - 1;
         }
+
+        public override string ToString()
+        {
+            return $"Snake Head: ({Head.X}, {Head.Y}), Direction: {CurrentDirection}, Body Length: {body.Count}";
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(CurrentDirection, Head, body);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Snake other)
+            {
+                return CurrentDirection == other.CurrentDirection &&
+                       Head.Equals(other.Head) &&
+                       body.SequenceEqual(other.body);
+            }
+            return false;
+        }
     }
 }

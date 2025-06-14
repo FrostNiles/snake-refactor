@@ -44,5 +44,25 @@ namespace Snake
                 Program.DrawCube();
             }
         }
+        public override string ToString()
+        {
+            return $"Screen: {ScreenWidth}x{ScreenHeight}, Score: {Score}, Game Over: {GameOver}";
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(ScreenWidth, ScreenHeight, Score, GameOver);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is GameSettings other)
+            {
+                return ScreenWidth == other.ScreenWidth &&
+                       ScreenHeight == other.ScreenHeight &&
+                       Score == other.Score &&
+                       GameOver == other.GameOver;
+            }
+            return false;
     }
 }

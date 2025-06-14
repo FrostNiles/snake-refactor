@@ -78,5 +78,27 @@ namespace Snake
             Console.WriteLine("Game over, Score: " + gameSettings.Score);
             Console.SetCursorPosition(gameSettings.ScreenWidth / 5, gameSettings.ScreenHeight / 2 + 1);
         }
-    }
+        public override string ToString()
+        {
+            return $"Game Settings: {gameSettings}, Snake: {snake}, Berry: {berry}";
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(gameSettings, snake, berry, rand, stopwatch);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Game other)
+            {
+                return gameSettings.Equals(other.gameSettings) &&
+                       snake.Equals(other.snake) &&
+                       berry.Equals(other.berry) &&
+                       rand.Equals(other.rand) &&
+                       stopwatch.ElapsedMilliseconds == other.stopwatch.ElapsedMilliseconds;
+            }
+            return false;
+        }
+
 }

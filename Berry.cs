@@ -28,5 +28,24 @@ namespace Snake
             int y = rand.Next(1, screenHeight - 1);
             Position = new Pixel(x, y, ConsoleColor.Cyan);
         }
+
+        public override string ToString()
+        {
+            return $"Berry Position: ({Position.X}, {Position.Y})";
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Position.X, Position.Y, Position.Color);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Berry other)
+            {
+                return Position.Equals(other.Position);
+            }
+            return false;
+        }
     }
 }
