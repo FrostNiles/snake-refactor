@@ -49,13 +49,26 @@ namespace Snake
             {
                 Console.Clear();
 
-                CheckWallCollision();
-                gameSettings.DrawGameArea();
-                CheckBerryEaten();
-                DrawSnakeBodyAndCheckSelfCollision();
-
-                if (gameSettings.gameover)
+                if (snake.IsCollidingWithWall(gameSettings.screenWidth, gameSettings.screenHeight))
+                {
+                    gameSettings.gameover = true;
                     break;
+                }
+
+                gameSettings.DrawGameArea();
+
+                if (berry.berryPosition.XPos == snake.Head.XPos &&
+                    berry.berryPosition.YPos == snake.Head.YPos)
+                {
+                    gameSettings.score++;
+                    berry.UpdatePosition();
+                }
+
+                if (snake.IsCollidingWithSelf())
+                {
+                    gameSettings.gameover = true;
+                    break;
+                }
 
                 snake.Draw();
                 berry.Draw();
@@ -65,60 +78,16 @@ namespace Snake
                 while (true)
                 {
                     time2 = DateTime.Now;
-                    if (time2.Subtract(time).TotalMilliseconds > 500) break;
+                    if (time2.Subtract(time).TotalMilliseconds > 500)
+                        break;
 
-                    gameSettings.gameover = snake.Move();
+                    snake.HandleInput();
                 }
 
-                snake.body.Add(new Pixel(snake.head.XPos, snake.head.YPos, ConsoleColor.Red));
-                snake.changePosition();
-
-                if (snake.body.Count > gameSettings.score)
-                {
-                    snake.body.RemoveAt(0);
-                }
+                snake.MoveForward();
+                snake.TrimToLength(gameSettings.score);
             }
 
-            EndGame();
-        }
-
-        private void CheckWallCollision()
-        {
-            if (snake.head.XPos == gameSettings.screenWidth - 1 ||
-                snake.head.XPos == 0 ||
-                snake.head.YPos == gameSettings.screenHeight - 1 ||
-                snake.head.YPos == 0)
-            {
-                gameSettings.gameover = true;
-            }
-        }
-
-        private void CheckBerryEaten()
-        {
-            if (berry.berryPosition.XPos == snake.head.XPos &&
-                berry.berryPosition.YPos == snake.head.YPos)
-            {
-                gameSettings.score++;
-                berry.UpdatePosition();
-            }
-        }
-
-        private void DrawSnakeBodyAndCheckSelfCollision()
-        {
-            foreach (var segment in snake.body)
-            {
-                Console.SetCursorPosition(segment.XPos, segment.YPos);
-                Program.DrawCube();
-
-                if (segment.XPos == snake.head.XPos && segment.YPos == snake.head.YPos)
-                {
-                    gameSettings.gameover = true;
-                }
-            }
-        }
-
-        private void EndGame()
-        {
             Console.SetCursorPosition(gameSettings.screenWidth / 5, gameSettings.screenHeight / 2);
             Console.WriteLine("Game over, Score: " + gameSettings.score);
             Console.SetCursorPosition(gameSettings.screenWidth / 5, gameSettings.screenHeight / 2 + 1);
@@ -154,67 +123,95 @@ namespace Snake
 
     class Snake
     {
+        public Direction CurrentDirection { get; private set; }
+        public Pixel Head { get; private set; }
+        private readonly List<Pixel> body;
+
+        public IReadOnlyList<Pixel> Body => body;
+
         public Snake(Direction direction, Pixel head)
         {
-            this.direction = direction;
-            this.head = head;
-            this.body = new List<Pixel>();
+            CurrentDirection = direction;
+            Head = head;
+            body = new List<Pixel>();
         }
-
-        public Direction direction { get; set; }
-        public Pixel head { get; set; }
-        public List<Pixel> body { get; set; }
 
         public void Draw()
         {
-            Console.SetCursorPosition(head.XPos, head.YPos);
-            Console.ForegroundColor = head.ScreenColor;
+            DrawHead();
+            DrawBody();
+        }
+
+        private void DrawHead()
+        {
+            Console.SetCursorPosition(Head.XPos, Head.YPos);
+            Console.ForegroundColor = Head.ScreenColor;
             Program.DrawCube();
         }
 
-        public bool Move()
+        private void DrawBody()
         {
-            while (Console.KeyAvailable)
+            Console.ForegroundColor = ConsoleColor.Red;
+            foreach (var segment in body)
             {
-                ConsoleKeyInfo key = Console.ReadKey(false);
-                if (key.Key == ConsoleKey.UpArrow && this.direction != Direction.Down)
-                {
-                    this.direction = Direction.Up;
-                }
-                else if (key.Key == ConsoleKey.DownArrow && this.direction != Direction.Up)
-                {
-                    this.direction = Direction.Down;
-                }
-                else if (key.Key == ConsoleKey.LeftArrow && this.direction != Direction.Right)
-                {
-                    this.direction = Direction.Left;
-                }
-                else if (key.Key == ConsoleKey.RightArrow && this.direction != Direction.Left)
-                {
-                    this.direction = Direction.Right;
-                }
-                return false;
+                Console.SetCursorPosition(segment.XPos, segment.YPos);
+                Program.DrawCube();
             }
-            return false;
         }
 
-        public void changePosition()
+        public void HandleInput()
         {
-            switch (this.direction)
+            if (!Console.KeyAvailable) return;
+
+            ConsoleKeyInfo key = Console.ReadKey(intercept: true);
+            switch (key.Key)
             {
-                case Direction.Up:
-                    head.YPos--;
+                case ConsoleKey.UpArrow when CurrentDirection != Direction.Down:
+                    CurrentDirection = Direction.Up;
                     break;
-                case Direction.Down:
-                    head.YPos++;
+                case ConsoleKey.DownArrow when CurrentDirection != Direction.Up:
+                    CurrentDirection = Direction.Down;
                     break;
-                case Direction.Left:
-                    head.XPos--;
+                case ConsoleKey.LeftArrow when CurrentDirection != Direction.Right:
+                    CurrentDirection = Direction.Left;
                     break;
-                case Direction.Right:
-                    head.XPos++;
+                case ConsoleKey.RightArrow when CurrentDirection != Direction.Left:
+                    CurrentDirection = Direction.Right;
                     break;
             }
+        }
+
+        public void MoveForward()
+        {
+            body.Add(new Pixel(Head.XPos, Head.YPos, Head.ScreenColor));
+
+            Head = CurrentDirection switch
+            {
+                Direction.Up => new Pixel(Head.XPos, Head.YPos - 1, ConsoleColor.Red),
+                Direction.Down => new Pixel(Head.XPos, Head.YPos + 1, ConsoleColor.Red),
+                Direction.Left => new Pixel(Head.XPos - 1, Head.YPos, ConsoleColor.Red),
+                Direction.Right => new Pixel(Head.XPos + 1, Head.YPos, ConsoleColor.Red),
+                _ => Head
+            };
+        }
+
+        public void TrimToLength(int length)
+        {
+            while (body.Count > length)
+            {
+                body.RemoveAt(0);
+            }
+        }
+
+        public bool IsCollidingWithSelf()
+        {
+            return body.Any(segment => segment.XPos == Head.XPos && segment.YPos == Head.YPos);
+        }
+
+        public bool IsCollidingWithWall(int width, int height)
+        {
+            return Head.XPos <= 0 || Head.XPos >= width - 1 ||
+                   Head.YPos <= 0 || Head.YPos >= height - 1;
         }
     }
 
