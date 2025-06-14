@@ -1,4 +1,5 @@
-﻿
+﻿using System.Diagnostics;
+
 namespace Snake
 {
     class Program
@@ -21,64 +22,72 @@ namespace Snake
         private readonly Snake snake;
         private readonly Berry berry;
         private readonly Random rand;
-        private DateTime time;
-        private DateTime time2;
+        private readonly Stopwatch stopwatch;
+        private const int UpdateIntervalMs = 200;
 
         public Game()
         {
             gameSettings = new GameSettings(64, 32, 5, false);
             rand = new Random();
+            stopwatch = new Stopwatch();
 
             Pixel head = new Pixel(gameSettings.ScreenWidth / 2, gameSettings.ScreenHeight / 2, ConsoleColor.Red);
             snake = new Snake(Direction.Right, head);
             berry = new Berry(gameSettings.ScreenWidth, gameSettings.ScreenHeight);
             berry.Respawn(rand);
+            gameSettings.DrawGameArea();
         }
 
         public void Run()
         {
+            stopwatch.Start();
+
             while (!gameSettings.GameOver)
             {
-                Console.Clear();
-
-                if (snake.IsCollidingWithWall(gameSettings.ScreenWidth, gameSettings.ScreenHeight))
+                if (stopwatch.ElapsedMilliseconds < UpdateIntervalMs)
                 {
-                    gameSettings.GameOver = true;
-                    break;
-                }
-
-                gameSettings.DrawGameArea();
-
-                if (berry.Position.X == snake.Head.X && berry.Position.Y == snake.Head.Y)
-                {
-                    gameSettings.Score++;
-                    berry.Respawn(rand);
-                }
-
-                if (snake.IsCollidingWithSelf())
-                {
-                    gameSettings.GameOver = true;
-                    break;
-                }
-
-                snake.Draw();
-                berry.Draw();
-
-                time = DateTime.Now;
-
-                while (true)
-                {
-                    time2 = DateTime.Now;
-                    if (time2.Subtract(time).TotalMilliseconds > 500)
-                        break;
-
+                    Thread.Sleep(1);
                     snake.HandleInput();
+                    continue;
                 }
 
-                snake.MoveForward();
-                snake.TrimToLength(gameSettings.Score);
+                UpdateGame();
+                stopwatch.Restart();
             }
 
+            EndGame();
+        }
+
+        private void UpdateGame()
+        {
+            if (snake.IsCollidingWithWall(gameSettings.ScreenWidth, gameSettings.ScreenHeight))
+            {
+                gameSettings.GameOver = true;
+                return;
+            }
+
+            if (berry.Position.X == snake.Head.X && berry.Position.Y == snake.Head.Y)
+            {
+                gameSettings.Score++;
+                berry.Respawn(rand);
+            }
+
+            if (snake.IsCollidingWithSelf())
+            {
+                gameSettings.GameOver = true;
+                return;
+            }
+
+            snake.EraseTail();
+            snake.MoveForward();
+            snake.TrimToLength(gameSettings.Score);
+
+            snake.Draw();
+            berry.Draw();
+        }
+
+        private void EndGame()
+        {
             Console.SetCursorPosition(gameSettings.ScreenWidth / 5, gameSettings.ScreenHeight / 2);
             Console.WriteLine("Game over, Score: " + gameSettings.Score);
             Console.SetCursorPosition(gameSettings.ScreenWidth / 5, gameSettings.ScreenHeight / 2 + 1);
@@ -121,6 +130,18 @@ namespace Snake
                 Console.SetCursorPosition(segment.X, segment.Y);
                 Program.DrawCube();
             }
+        }
+
+        public void EraseTail()
+        {
+            if (body.Count == 0)
+            {
+                return;
+            }
+
+            var tail = body[0];
+            Console.SetCursorPosition(tail.X, tail.Y);
+            Console.Write(" ");
         }
 
         public void HandleInput()
@@ -233,6 +254,8 @@ namespace Snake
 
         public void DrawGameArea()
         {
+            Console.ForegroundColor = ConsoleColor.Green;
+
             for (int i = 0; i < ScreenWidth; i++)
             {
                 Console.SetCursorPosition(i, 0);
@@ -248,8 +271,6 @@ namespace Snake
                 Console.SetCursorPosition(ScreenWidth - 1, i);
                 Program.DrawCube();
             }
-
-            Console.ForegroundColor = ConsoleColor.Green;
         }
     }
 
