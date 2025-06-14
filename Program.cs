@@ -9,49 +9,53 @@ namespace Snake
     {
         static void Main(string[] args)
         {
-            GameSettings gameSettings = new GameSettings(64, 32, 5, false);
-            Random randNum = new Random();
+            Game game = new Game();
+            game.Run();
+        }
 
+        public static void DrawCube()
+        {
+            Console.Write("■");
+        }
+
+        public static int GetRandomNumber(int min, int max)
+        {
+            Random randNumber = new Random();
+            return randNumber.Next(min, max);
+        }
+    }
+
+    class Game
+    {
+        private readonly GameSettings gameSettings;
+        private readonly Snake snake;
+        private readonly Berry berry;
+        private DateTime time;
+        private DateTime time2;
+
+        public Game()
+        {
+            gameSettings = new GameSettings(64, 32, 5, false);
             Pixel head = new Pixel(gameSettings.screenWidth / 2, gameSettings.screenHeight / 2, ConsoleColor.Red);
-            Snake snake = new Snake(Direction.Right, head);
-            Berry berry = new Berry(gameSettings.screenWidth, gameSettings.screenHeight);
+            snake = new Snake(Direction.Right, head);
+            berry = new Berry(gameSettings.screenWidth, gameSettings.screenHeight);
+            time = DateTime.Now;
+            time2 = DateTime.Now;
+        }
 
-            DateTime time = DateTime.Now;
-            DateTime time2 = DateTime.Now;
-
-            while (true)
+        public void Run()
+        {
+            while (!gameSettings.gameover)
             {
                 Console.Clear();
 
-                if (snake.head.XPos == gameSettings.screenWidth - 1 || snake.head.XPos == 0 ||
-                    snake.head.YPos == gameSettings.screenHeight - 1 || snake.head.YPos == 0)
-                {
-                    gameSettings.gameover = true;
-                }
-
+                CheckWallCollision();
                 gameSettings.DrawGameArea();
-
-                if (berry.berryPosition.XPos == snake.head.XPos && berry.berryPosition.YPos == snake.head.YPos)
-                {
-                    gameSettings.score++;
-                    berry.UpdatePosition();
-                }
-
-                for (int i = 0; i < snake.body.Count(); i++)
-                {
-                    Console.SetCursorPosition(snake.body[i].XPos, snake.body[i].YPos);
-                    DrawCube();
-
-                    if (snake.body[i].XPos == snake.head.XPos && snake.body[i].YPos == snake.head.YPos)
-                    {
-                        gameSettings.gameover = true;
-                    }
-                }
+                CheckBerryEaten();
+                DrawSnakeBodyAndCheckSelfCollision();
 
                 if (gameSettings.gameover)
-                {
                     break;
-                }
 
                 snake.Draw();
                 berry.Draw();
@@ -69,26 +73,55 @@ namespace Snake
                 snake.body.Add(new Pixel(snake.head.XPos, snake.head.YPos, ConsoleColor.Red));
                 snake.changePosition();
 
-                if (snake.body.Count() > gameSettings.score)
+                if (snake.body.Count > gameSettings.score)
                 {
                     snake.body.RemoveAt(0);
                 }
             }
 
+            EndGame();
+        }
+
+        private void CheckWallCollision()
+        {
+            if (snake.head.XPos == gameSettings.screenWidth - 1 ||
+                snake.head.XPos == 0 ||
+                snake.head.YPos == gameSettings.screenHeight - 1 ||
+                snake.head.YPos == 0)
+            {
+                gameSettings.gameover = true;
+            }
+        }
+
+        private void CheckBerryEaten()
+        {
+            if (berry.berryPosition.XPos == snake.head.XPos &&
+                berry.berryPosition.YPos == snake.head.YPos)
+            {
+                gameSettings.score++;
+                berry.UpdatePosition();
+            }
+        }
+
+        private void DrawSnakeBodyAndCheckSelfCollision()
+        {
+            foreach (var segment in snake.body)
+            {
+                Console.SetCursorPosition(segment.XPos, segment.YPos);
+                Program.DrawCube();
+
+                if (segment.XPos == snake.head.XPos && segment.YPos == snake.head.YPos)
+                {
+                    gameSettings.gameover = true;
+                }
+            }
+        }
+
+        private void EndGame()
+        {
             Console.SetCursorPosition(gameSettings.screenWidth / 5, gameSettings.screenHeight / 2);
             Console.WriteLine("Game over, Score: " + gameSettings.score);
             Console.SetCursorPosition(gameSettings.screenWidth / 5, gameSettings.screenHeight / 2 + 1);
-        }
-
-        public static void DrawCube()
-        {
-            Console.Write("■");
-        }
-
-        public static int GetRandomNumber(int min, int max)
-        {
-            Random randNumber = new Random();
-            return randNumber.Next(min, max);
         }
     }
 
