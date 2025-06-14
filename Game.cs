@@ -88,7 +88,7 @@ namespace Snake
             return HashCode.Combine(gameSettings, snake, berry, rand, stopwatch);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is Game other)
             {
@@ -100,5 +100,6 @@ namespace Snake
             }
             return false;
         }
+    }
 
 }

@@ -54,7 +54,7 @@ namespace Snake
             return HashCode.Combine(ScreenWidth, ScreenHeight, Score, GameOver);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is GameSettings other)
             {
@@ -64,5 +64,6 @@ namespace Snake
                        GameOver == other.GameOver;
             }
             return false;
+        }
     }
 }

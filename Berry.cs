@@ -39,7 +39,7 @@ namespace Snake
             return HashCode.Combine(Position.X, Position.Y, Position.Color);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is Berry other)
             {
