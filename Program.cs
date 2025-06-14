@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-
+﻿
 namespace Snake
 {
     class Program
@@ -17,12 +13,6 @@ namespace Snake
         {
             Console.Write("■");
         }
-
-        public static int GetRandomNumber(int min, int max)
-        {
-            Random randNumber = new Random();
-            return randNumber.Next(min, max);
-        }
     }
 
     class Game
@@ -30,43 +20,44 @@ namespace Snake
         private readonly GameSettings gameSettings;
         private readonly Snake snake;
         private readonly Berry berry;
+        private readonly Random rand;
         private DateTime time;
         private DateTime time2;
 
         public Game()
         {
             gameSettings = new GameSettings(64, 32, 5, false);
-            Pixel head = new Pixel(gameSettings.screenWidth / 2, gameSettings.screenHeight / 2, ConsoleColor.Red);
+            rand = new Random();
+
+            Pixel head = new Pixel(gameSettings.ScreenWidth / 2, gameSettings.ScreenHeight / 2, ConsoleColor.Red);
             snake = new Snake(Direction.Right, head);
-            berry = new Berry(gameSettings.screenWidth, gameSettings.screenHeight);
-            time = DateTime.Now;
-            time2 = DateTime.Now;
+            berry = new Berry(gameSettings.ScreenWidth, gameSettings.ScreenHeight);
+            berry.Respawn(rand);
         }
 
         public void Run()
         {
-            while (!gameSettings.gameover)
+            while (!gameSettings.GameOver)
             {
                 Console.Clear();
 
-                if (snake.IsCollidingWithWall(gameSettings.screenWidth, gameSettings.screenHeight))
+                if (snake.IsCollidingWithWall(gameSettings.ScreenWidth, gameSettings.ScreenHeight))
                 {
-                    gameSettings.gameover = true;
+                    gameSettings.GameOver = true;
                     break;
                 }
 
                 gameSettings.DrawGameArea();
 
-                if (berry.berryPosition.XPos == snake.Head.XPos &&
-                    berry.berryPosition.YPos == snake.Head.YPos)
+                if (berry.Position.X == snake.Head.X && berry.Position.Y == snake.Head.Y)
                 {
-                    gameSettings.score++;
-                    berry.UpdatePosition();
+                    gameSettings.Score++;
+                    berry.Respawn(rand);
                 }
 
                 if (snake.IsCollidingWithSelf())
                 {
-                    gameSettings.gameover = true;
+                    gameSettings.GameOver = true;
                     break;
                 }
 
@@ -85,39 +76,12 @@ namespace Snake
                 }
 
                 snake.MoveForward();
-                snake.TrimToLength(gameSettings.score);
+                snake.TrimToLength(gameSettings.Score);
             }
 
-            Console.SetCursorPosition(gameSettings.screenWidth / 5, gameSettings.screenHeight / 2);
-            Console.WriteLine("Game over, Score: " + gameSettings.score);
-            Console.SetCursorPosition(gameSettings.screenWidth / 5, gameSettings.screenHeight / 2 + 1);
-        }
-    }
-
-    class Berry
-    {
-        public Berry(int screenWidth, int screenHeight)
-        {
-            this.screenWidth = screenWidth;
-            this.screenHeight = screenHeight;
-            this.berryPosition = new Pixel(Program.GetRandomNumber(1, screenWidth), Program.GetRandomNumber(1, screenHeight), ConsoleColor.Cyan);
-        }
-
-        public Pixel berryPosition { get; set; }
-        int screenHeight { get; set; }
-        int screenWidth { get; set; }
-
-        public void Draw()
-        {
-            Console.SetCursorPosition(berryPosition.XPos, berryPosition.YPos);
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Program.DrawCube();
-        }
-
-        public void UpdatePosition()
-        {
-            berryPosition.XPos = Program.GetRandomNumber(1, screenWidth);
-            berryPosition.YPos = Program.GetRandomNumber(1, screenHeight);
+            Console.SetCursorPosition(gameSettings.ScreenWidth / 5, gameSettings.ScreenHeight / 2);
+            Console.WriteLine("Game over, Score: " + gameSettings.Score);
+            Console.SetCursorPosition(gameSettings.ScreenWidth / 5, gameSettings.ScreenHeight / 2 + 1);
         }
     }
 
@@ -144,8 +108,8 @@ namespace Snake
 
         private void DrawHead()
         {
-            Console.SetCursorPosition(Head.XPos, Head.YPos);
-            Console.ForegroundColor = Head.ScreenColor;
+            Console.SetCursorPosition(Head.X, Head.Y);
+            Console.ForegroundColor = Head.Color;
             Program.DrawCube();
         }
 
@@ -154,7 +118,7 @@ namespace Snake
             Console.ForegroundColor = ConsoleColor.Red;
             foreach (var segment in body)
             {
-                Console.SetCursorPosition(segment.XPos, segment.YPos);
+                Console.SetCursorPosition(segment.X, segment.Y);
                 Program.DrawCube();
             }
         }
@@ -183,14 +147,14 @@ namespace Snake
 
         public void MoveForward()
         {
-            body.Add(new Pixel(Head.XPos, Head.YPos, Head.ScreenColor));
+            body.Add(new Pixel(Head.X, Head.Y, Head.Color));
 
             Head = CurrentDirection switch
             {
-                Direction.Up => new Pixel(Head.XPos, Head.YPos - 1, ConsoleColor.Red),
-                Direction.Down => new Pixel(Head.XPos, Head.YPos + 1, ConsoleColor.Red),
-                Direction.Left => new Pixel(Head.XPos - 1, Head.YPos, ConsoleColor.Red),
-                Direction.Right => new Pixel(Head.XPos + 1, Head.YPos, ConsoleColor.Red),
+                Direction.Up => new Pixel(Head.X, Head.Y - 1, ConsoleColor.Red),
+                Direction.Down => new Pixel(Head.X, Head.Y + 1, ConsoleColor.Red),
+                Direction.Left => new Pixel(Head.X - 1, Head.Y, ConsoleColor.Red),
+                Direction.Right => new Pixel(Head.X + 1, Head.Y, ConsoleColor.Red),
                 _ => Head
             };
         }
@@ -205,54 +169,83 @@ namespace Snake
 
         public bool IsCollidingWithSelf()
         {
-            return body.Any(segment => segment.XPos == Head.XPos && segment.YPos == Head.YPos);
+            return body.Any(segment => segment.X == Head.X && segment.Y == Head.Y);
         }
 
         public bool IsCollidingWithWall(int width, int height)
         {
-            return Head.XPos <= 0 || Head.XPos >= width - 1 ||
-                   Head.YPos <= 0 || Head.YPos >= height - 1;
+            return Head.X <= 0 || Head.X >= width - 1 ||
+                   Head.Y <= 0 || Head.Y >= height - 1;
+        }
+    }
+
+    class Berry
+    {
+        private readonly int screenWidth;
+        private readonly int screenHeight;
+
+        public Pixel Position { get; private set; }
+
+        public Berry(int screenWidth, int screenHeight)
+        {
+            this.screenWidth = screenWidth;
+            this.screenHeight = screenHeight;
+            this.Position = new Pixel(0, 0, ConsoleColor.Cyan);
+        }
+
+        public void Draw()
+        {
+            Console.SetCursorPosition(Position.X, Position.Y);
+            Console.ForegroundColor = Position.Color;
+            Program.DrawCube();
+        }
+
+        public void Respawn(Random rand)
+        {
+            int x = rand.Next(1, screenWidth - 1);
+            int y = rand.Next(1, screenHeight - 1);
+            Position = new Pixel(x, y, ConsoleColor.Cyan);
         }
     }
 
     class GameSettings
     {
+        public int ScreenWidth { get; set; }
+        public int ScreenHeight { get; set; }
+        public int Score { get; set; }
+        public bool GameOver { get; set; }
+
         public GameSettings()
         {
-            this.screenWidth = 64;
-            this.screenHeight = 32;
-            this.score = 0;
-            this.gameover = false;
+            ScreenWidth = 64;
+            ScreenHeight = 32;
+            Score = 0;
+            GameOver = false;
         }
 
-        public GameSettings(int screenWidth, int screenHeight, int score, bool gameover)
+        public GameSettings(int width, int height, int score, bool gameOver)
         {
-            this.screenWidth = screenWidth;
-            this.screenHeight = screenHeight;
-            this.score = score;
-            this.gameover = gameover;
+            ScreenWidth = width;
+            ScreenHeight = height;
+            Score = score;
+            GameOver = gameOver;
         }
-
-        public int screenWidth { get; set; }
-        public int screenHeight { get; set; }
-        public int score { get; set; }
-        public bool gameover { get; set; }
 
         public void DrawGameArea()
         {
-            for (int i = 0; i < this.screenWidth; i++)
+            for (int i = 0; i < ScreenWidth; i++)
             {
                 Console.SetCursorPosition(i, 0);
                 Program.DrawCube();
-                Console.SetCursorPosition(i, this.screenHeight - 1);
+                Console.SetCursorPosition(i, ScreenHeight - 1);
                 Program.DrawCube();
             }
 
-            for (int i = 0; i < this.screenHeight; i++)
+            for (int i = 0; i < ScreenHeight; i++)
             {
                 Console.SetCursorPosition(0, i);
                 Program.DrawCube();
-                Console.SetCursorPosition(this.screenWidth - 1, i);
+                Console.SetCursorPosition(ScreenWidth - 1, i);
                 Program.DrawCube();
             }
 
@@ -262,16 +255,35 @@ namespace Snake
 
     class Pixel
     {
-        public Pixel(int xPos, int yPos, ConsoleColor color)
+        public int X { get; set; }
+        public int Y { get; set; }
+        public ConsoleColor Color { get; set; }
+
+        public Pixel(int x, int y, ConsoleColor color)
         {
-            this.XPos = xPos;
-            this.YPos = yPos;
-            this.ScreenColor = color;
+            X = x;
+            Y = y;
+            Color = color;
         }
 
-        public int XPos { get; set; }
-        public int YPos { get; set; }
-        public ConsoleColor ScreenColor { get; set; }
+        public override bool Equals(object? obj)
+        {
+            if (obj is Pixel other)
+            {
+                return X == other.X && Y == other.Y;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(X, Y);
+        }
+
+        public override string ToString()
+        {
+            return $"Pixel({X}, {Y}, Color: {Color})";
+        }
     }
 
     enum Direction
